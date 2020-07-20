@@ -15,6 +15,7 @@ class BaseEnv(gym.Env):
 
     def __init__(self,
                  config_file,
+                 robot_file,
                  model_id=None,
                  mode='headless',
                  action_timestep=1 / 10.0,
@@ -30,6 +31,7 @@ class BaseEnv(gym.Env):
         :param device_idx: device_idx: which GPU to run the simulation and rendering on
         """
         self.config = parse_config(config_file)
+        self.robot_file = parse_config(robot_file)
         if model_id is not None:
             self.config['model_id'] = model_id
 
@@ -88,29 +90,87 @@ class BaseEnv(gym.Env):
             )
         self.simulator.import_scene(scene, load_texture=self.config.get('load_texture', True))
 
-        if self.config['robot'] == 'Turtlebot':
-            robot = Turtlebot(self.config)
-        elif self.config['robot'] == 'Husky':
-            robot = Husky(self.config)
-        elif self.config['robot'] == 'Ant':
-            robot = Ant(self.config)
-        elif self.config['robot'] == 'Humanoid':
-            robot = Humanoid(self.config)
-        elif self.config['robot'] == 'JR2':
-            robot = JR2(self.config)
-        elif self.config['robot'] == 'JR2_Kinova':
-            robot = JR2_Kinova(self.config)
-        elif self.config['robot'] == 'Freight':
-            robot = Freight(self.config)
-        elif self.config['robot'] == 'Fetch':
-            robot = Fetch(self.config)
-        elif self.config['robot'] == 'Locobot':
-            robot = Locobot(self.config)
-        else:
-            raise Exception('unknown robot type: {}'.format(self.config['robot']))
+        # if self.config['hider_robot'] == 'Turtlebot':
+        #     hider_robot = Turtlebot(self.config)
+        # elif self.config['hider_robot'] == 'Husky':
+        #     hider_robot = Husky(self.config)
+        # elif self.config['hider_robot'] == 'Ant':
+        #     hider_robot = Ant(self.config)
+        # elif self.config['hider_robot'] == 'Humanoid':
+        #     hider_robot = Humanoid(self.config)
+        # elif self.config['hider_robot'] == 'JR2':
+        #     hider_robot = JR2(self.config)
+        # elif self.config['hider_robot'] == 'JR2_Kinova':
+        #     hider_robot = JR2_Kinova(self.config)
+        # elif self.config['hider_robot'] == 'Freight':
+        #     hider_robot = Freight(self.config)
+        # elif self.config['hider_robot'] == 'Fetch':
+        #     hider_robot = Fetch(self.config)
+        # elif self.config['hider_robot'] == 'Locobot':
+        #     hider_robot = HiderLocobot(self.config)
+        # else:
+        #     raise Exception('unknown hider robot type: {}'.format(self.config['hider_robot']))
+
+        # if self.config['seeker_robot'] == 'Turtlebot':
+        #     seeker_robot = Turtlebot(self.config)
+        # elif self.config['seeker_robot'] == 'Husky':
+        #     seeker_robot = Husky(self.config)
+        # elif self.config['seeker_robot'] == 'Ant':
+        #     seeker_robot = Ant(self.config)
+        # elif self.config['seeker_robot'] == 'Humanoid':
+        #     seeker_robot = Humanoid(self.config)
+        # elif self.config['seeker_robot'] == 'JR2':
+        #     seeker_robot = JR2(self.config)
+        # elif self.config['seeker_robot'] == 'JR2_Kinova':
+        #     seeker_robot = JR2_Kinova(self.config)
+        # elif self.config['seeker_robot'] == 'Freight':
+        #     seeker_robot = Freight(self.config)
+        # elif self.config['seeker_robot'] == 'Fetch':
+        #     seeker_robot = Fetch(self.config)
+        # elif self.config['seeker_robot'] == 'Locobot':
+        #     seeker_robot = SeekerLocobot(self.config)
+        # else:
+        #     raise Exception('unknown seeker robot type: {}'.format(self.config['seeker_robot']))
+
+        # for robot in self.config['robots']:
+        #     # print(robot)
+        #     if robot['robot'] == 'Turtlebot':
+        #         robot_elem = Turtlebot(robot)
+            # elif self.config['robot'] == 'Husky':
+            #     robot = Husky(self.config)
+            # elif self.config['robot'] == 'Ant':
+            #     robot = Ant(self.config)
+            # elif self.config['robot'] == 'Humanoid':
+            #     robot = Humanoid(self.config)
+            # elif self.config['robot'] == 'JR2':
+            #     robot = JR2(self.config)
+            # elif self.config['robot'] == 'JR2_Kinova':
+            #     robot = JR2_Kinova(self.config)
+            # elif self.config['robot'] == 'Freight':
+            #     robot = Freight(self.config)
+            # elif self.config['robot'] == 'Fetch':
+            #     robot = Fetch(self.config)
+            # elif self.config['robot'] == 'Locobot':
+            #     robot = SeekerLocobot(self.config)
+            # else:
+            #     raise Exception('unknown robot type: {}'.format(self.config['robot']))
+        
+        self.robots = []
+        for robot in self.robot_file['robots']:
+            if robot['robot'] == 'Turtlebot':
+                robot_elem = Turtlebot(robot)
+            elif robot['robot'] == 'Locobot':
+                robot_elem = Locobot(robot)
+            else:
+                raise Exception('not turtlebot')
+            self.robots.append(robot_elem)
 
         self.scene = scene
-        self.robots = [robot]
+        # self.hider_robot = hider_robot
+        # self.seeker_robot = seeker_robot
+        # self.simulator.import_robot(hider_robot)
+        # self.simulator.import_robot(seeker_robot)
+        # self.robots = [robot]
         for robot in self.robots:
             self.simulator.import_robot(robot)
 
@@ -141,3 +201,4 @@ class BaseEnv(gym.Env):
 
     def set_mode(self, mode):
         self.simulator.mode = mode
+
